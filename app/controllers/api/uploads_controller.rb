@@ -1,4 +1,4 @@
-class Api::UploadsController < ApplicationController
+class Api::UploadsController < ActionController::Base
     def upload
         # Verifique se o parâmetro 'backup_name' foi enviado na solicitação.
         if params[:backup_name].present?
@@ -34,7 +34,8 @@ class Api::UploadsController < ApplicationController
         }
       end
   
-      render json: { folders: folder_info }
+      @folders = folder_info
+      #render json: { folders: folder_info }
     end
   
     private
@@ -54,6 +55,5 @@ class Api::UploadsController < ApplicationController
 
       "%.2f #{units[i]}" % total_size
     end
-
-    
+  end
 end
