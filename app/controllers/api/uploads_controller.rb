@@ -1,24 +1,36 @@
 class Api::UploadsController < ActionController::Base
     def upload
-        # Verifique se o parâmetro 'backup_name' foi enviado na solicitação.
-        if params[:backup_name].present?
-          # Crie uma nova pasta dentro de 'data' com o nome do backup.
-          backup_folder = Rails.root.join('data', params[:backup_name])
-          FileUtils.mkdir_p(backup_folder)
-    
-          # Salve os arquivos enviados na pasta do backup.
-          params[:files].each do |uploaded_file|
-            file_path = File.join(backup_folder, uploaded_file.original_filename)
+      if params[:backup_name].present?
+        backup_folder = Rails.root.join('data', params[:backup_name])
+        FileUtils.mkdir_p(backup_folder)
+
+        params[:files].each do |uploaded_file|
+          file_path = File.join(backup_folder, uploaded_file.original_filename)
+
+          if File.exist?(file_path)
+            # Se o arquivo já existe na pasta de backup, verifique a data de modificação.
+            existing_mtime = File.mtime(file_path)
+            new_mtime = File.mtime(uploaded_file.tempfile)
+            
+            if existing_mtime != new_mtime and params[:overwrite]=="true"
+              # As datas de modificação são diferentes, sobrescreva o arquivo.
+              File.open(file_path, 'wb') do |file|
+                file.write(uploaded_file.read)
+              end
+            end
+          else
+            # O arquivo não existe na pasta de backup, crie-o.
             File.open(file_path, 'wb') do |file|
               file.write(uploaded_file.read)
             end
           end
-    
-          render json: { message: 'Arquivos enviados com sucesso.' }
-        else
-          render json: { error: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
         end
+
+        render json: { message: 'Arquivos enviados com sucesso.' }
+      else
+        render json: { error: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
       end
+    end 
     def list_backups
       data_directory = Rails.root.join('data')
       folders = Dir.entries(data_directory).select { |entry| File.directory?(File.join(data_directory, entry)) && entry != '.' && entry != '..' }
@@ -34,7 +46,7 @@ class Api::UploadsController < ActionController::Base
         }
       end
   
-      @folders = folder_info
+      @folders = folder_infoz
       #render json: { folders: folder_info }
     end
 
@@ -73,6 +85,4 @@ class Api::UploadsController < ActionController::Base
       "%.2f #{units[i]}" % total_size
     end
   end
-
-
-
+end
