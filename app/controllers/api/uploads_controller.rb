@@ -19,4 +19,41 @@ class Api::UploadsController < ApplicationController
           render json: { error: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
         end
       end
+    def list_backups
+      data_directory = Rails.root.join('data')
+      folders = Dir.entries(data_directory).select { |entry| File.directory?(File.join(data_directory, entry)) && entry != '.' && entry != '..' }
+
+      folder_info = []
+      folders.each do |folder|
+        folder_path = File.join(data_directory, folder)
+        folder_info << {
+          name: folder,
+          size: folder_size(folder_path),
+          created_at: File.ctime(folder_path),
+          updated_at: File.mtime(folder_path)
+        }
+      end
+  
+      render json: { folders: folder_info }
+    end
+  
+    private
+  
+    def folder_size(path)
+      total_size = 0
+      Dir.glob(File.join(path, '**', '*')).each do |file|
+        total_size += File.size(file) if File.file?(file)
+      end
+      # Converte o tamanho para uma unidade legível (KB, MB, GB, etc.)
+      units = %w[Bytes KB MB GB TB PB EB ZB YB]
+      i = 0
+      while total_size >= 1024 && i < units.length - 1
+        total_size /= 1024.0
+        i += 1
+      end
+
+      "%.2f #{units[i]}" % total_size
+    end
+
+    
 end
