@@ -1,3 +1,5 @@
+require "zip"
+
 class Api::UploadsController < ActionController::Base
     def upload
       if params[:backup_name].present?
@@ -84,6 +86,37 @@ class Api::UploadsController < ActionController::Base
         end
       else
         render json: { message: 'Parâmetros "backup_name" e "file_name" são obrigatórios.' }, status: :unprocessable_entity
+      end
+    end
+
+    def download_backup
+      backup_name = params[:backup_name]
+  
+      if backup_name.present?
+        backup_folder = Rails.root.join('data', backup_name)
+        zip_filename = "#{backup_name}.zip"
+        zip_file_path = Rails.root.join('data', zip_filename)
+  
+        if File.directory?(backup_folder)
+
+          # Remova o arquivo .zip existente, se existir.
+          File.delete(zip_file_path) if File.exist?(zip_file_path)
+
+          # Crie um arquivo .zip diretamente na pasta de backup.
+          Zip::File.open(zip_file_path, Zip::File::CREATE) do |zipfile|
+            Dir[File.join(backup_folder, '**', '**')].each do |file|
+              relative_path = file.sub("#{backup_folder}/", '')
+              zipfile.add(relative_path, file)
+            end
+          end
+  
+          # Configure o cabeçalho de resposta Content-Disposition para forçar o download.
+          send_file zip_file_path, type: 'application/zip', filename: zip_filename, disposition: 'attachment'
+        else
+          render json: { error: "O backup #{backup_name} não foi encontrado." }, status: :not_found
+        end
+      else
+        render json: { error: 'O parâmetro "backup_name" é obrigatório.' }, status: :unprocessable_entity
       end
     end
   

@@ -150,6 +150,7 @@ GEM
       psych (>= 4.0.0)
     reline (0.3.8)
       io-console (~> 0.5)
+    rubyzip (2.3.2)
     sqlite3 (1.6.6-x86_64-linux)
     stringio (3.0.8)
     thor (1.2.2)
@@ -169,6 +170,7 @@ DEPENDENCIES
   debug
   puma (~> 5.0)
   rails (~> 7.0.8)
+  rubyzip
   sqlite3 (~> 1.4)
   tzinfo-data
 

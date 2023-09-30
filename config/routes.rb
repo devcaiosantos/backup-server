@@ -6,5 +6,6 @@ Rails.application.routes.draw do
 
     get 'list_files/:backup_name', to: 'files#list', as: 'list_files'
     delete 'delete_file', to: 'uploads#delete_file'
+    get 'download_backup', to: 'uploads#download_backup'
   end
 end
