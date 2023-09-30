@@ -21,12 +21,12 @@
     <th>Criado em:</th>
     <th>Última modificação</th>
   </tr>
-  <tr class="folder">
-    <% @folders.each do |folder| %>
-      <td><a href="#"><%= folder[:name] %></a></td>
-      <td><%= folder[:created_at].strftime('%d/%m/%y') %></td>
-      <td><%= folder[:updated_at].strftime('%d/%m/%y') %></td>
-    <% end %>
-  </tr>
+  <% @folders.each do |folder| %>
+    <tr class="folder">
+      <td><%= link_to folder[:name], api_list_files_path(folder[:name]), remote: true %></td>
+      <td><%= folder[:created_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+      <td><%= folder[:updated_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+    </tr>
+  <% end %>
 </table>
 

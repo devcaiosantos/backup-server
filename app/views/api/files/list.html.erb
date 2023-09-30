@@ -1,0 +1,32 @@
+<head>
+  <style>
+    th {
+      width: 200px;
+      text-align: left;
+    }
+    td {
+      width: 200px;
+    }
+    .folder {
+      background-color: #eee;
+    }
+  </style>
+</head>
+
+<h1>Backup: <%= @folder %></h1>
+
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Criado em:</th>
+        <th>Última modificação</th>
+    </tr>
+    <% @files.each do |file| %>
+    <tr class="folder">
+        <td><%= file[:name] %></td>
+        <td><%= file[:created_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+        <td><%= file[:updated_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+        </tr> 
+    <% end %>
+</table>
+

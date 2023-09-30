@@ -46,7 +46,7 @@ class Api::UploadsController < ActionController::Base
         }
       end
   
-      @folders = folder_infoz
+      @folders = folder_info
       #render json: { folders: folder_info }
     end
 
