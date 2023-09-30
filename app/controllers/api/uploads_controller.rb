@@ -28,7 +28,7 @@ class Api::UploadsController < ActionController::Base
 
         render json: { message: 'Arquivos enviados com sucesso.' }
       else
-        render json: { error: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
+        render json: { message: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
       end
     end 
     def list_backups
@@ -61,10 +61,29 @@ class Api::UploadsController < ActionController::Base
           FileUtils.rm_rf(backup_folder)
           render json: { message: 'Backup excluído com sucesso.' }
         else
-          render json: { error: 'O backup não existe.' }, status: :not_found
+          render json: { message: 'O backup não existe.' }, status: :not_found
         end
       else
-        render json: { error: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
+        render json: { message: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
+      end
+    end
+
+    def delete_file
+      backup_name = params[:backup_name]
+      file_name = params[:file_name]
+  
+      if backup_name.present? && file_name.present?
+        backup_folder = Rails.root.join('data', backup_name)
+        file_path = File.join(backup_folder, file_name)
+  
+        if File.exist?(file_path)
+          File.delete(file_path)
+          render json: { message: "Arquivo #{file_name} deletado com sucesso do backup #{backup_name}." }
+        else
+          render json: { message: "Arquivo #{file_name} não encontrado no backup #{backup_name}." }, status: :not_found
+        end
+      else
+        render json: { message: 'Parâmetros "backup_name" e "file_name" são obrigatórios.' }, status: :unprocessable_entity
       end
     end
   
