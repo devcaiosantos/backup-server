@@ -85,4 +85,3 @@ class Api::UploadsController < ActionController::Base
       "%.2f #{units[i]}" % total_size
     end
   end
-end
