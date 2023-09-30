@@ -37,6 +37,24 @@ class Api::UploadsController < ActionController::Base
       @folders = folder_info
       #render json: { folders: folder_info }
     end
+
+    def delete_backup
+      # Verifique se o parâmetro 'backup_name' foi enviado na solicitação.
+      if params[:backup_name].present?
+        backup_folder = Rails.root.join('data', params[:backup_name])
+  
+        # Verifique se a pasta de backup existe.
+        if File.exist?(backup_folder)
+          # Exclua a pasta de backup e seu conteúdo.
+          FileUtils.rm_rf(backup_folder)
+          render json: { message: 'Backup excluído com sucesso.' }
+        else
+          render json: { error: 'O backup não existe.' }, status: :not_found
+        end
+      else
+        render json: { error: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
+      end
+    end
   
     private
   
@@ -52,8 +70,9 @@ class Api::UploadsController < ActionController::Base
         total_size /= 1024.0
         i += 1
       end
-
       "%.2f #{units[i]}" % total_size
     end
   end
-end
+
+
+
