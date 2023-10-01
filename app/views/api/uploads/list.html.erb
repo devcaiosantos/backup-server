@@ -1,0 +1,77 @@
+<head>
+  <style>
+    th {
+      width: 200px;
+      text-align: left;
+    }
+    td {
+      width: 200px;
+    }
+    .folder {
+      background-color: #eee;
+    }
+    form {
+      border: 1px solid #ccc;
+      margin: 10px;
+      padding: 10px;
+      width: 50%;
+    }
+    .title {
+      margin-top: 30vh;
+      margin-left: 10px;
+    }
+    .custom-button a {
+      text-decoration: none;
+      color: black;
+    }
+    td.btn {
+      background-color: white;
+      width: auto;
+    }
+    td.btn form {
+      border: none;
+    }
+  </style>
+</head>
+
+<h1>Backups</h1>
+
+<table>
+  <tr>
+    <th>Nome</th>
+    <th>Criado em:</th>
+    <th>Última modificação</th>
+  </tr>
+  <% @folders.each do |folder| %>
+    <tr class="folder">
+      <td><%= link_to folder[:name], list_path(folder[:name]), remote: true %></td>
+      <td><%= folder[:created_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+      <td><%= folder[:updated_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+      <td class="btn">
+        <%= form_tag('/api/download_backup', method: :get) do %>
+          <%= hidden_field_tag :backup_name, folder[:name] %>
+          <%= submit_tag("Download") %>
+        <%end %>
+      </td>
+      <td class="btn">
+        <%= form_tag('/api/delete_backup', method: :delete) do %>
+          <%= hidden_field_tag :backup_name, folder[:name] %>
+          <%= submit_tag("Remover") %>
+        <%end %>
+      </td>
+    </tr>
+  <% end %>
+</table>
+
+<p class="title"><strong>Upload</strong></p>
+<%= form_tag('/api/upload', method: :post, multipart: true) do %>
+  <%= label_tag(:backup_name, "Nome:") %>
+  <%= text_field_tag(:backup_name) %>
+  <br><br>
+  <%= check_box_tag(:overwrite, true) %>
+  <%= label_tag(:overwrite, "Sobrescrever arquivos caso haja existente") %>
+  <br><br>
+  <%= file_field_tag 'files[]', multiple: true %>
+  <br><br>
+  <%= submit_tag("Salvar") %>
+<% end %>

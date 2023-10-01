@@ -14,7 +14,7 @@ class Api::UploadsController < ActionController::Base
             existing_mtime = File.mtime(file_path)
             new_mtime = File.mtime(uploaded_file.tempfile)
             
-            if existing_mtime != new_mtime and params[:overwrite]=="true"
+            if existing_mtime != new_mtime and params[:overwrite]=='true'
               # As datas de modificação são diferentes, sobrescreva o arquivo.
               File.open(file_path, 'wb') do |file|
                 file.write(uploaded_file.read)
@@ -27,13 +27,11 @@ class Api::UploadsController < ActionController::Base
             end
           end
         end
-
-        render json: { message: 'Arquivos enviados com sucesso.' }
-      else
-        render json: { message: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
       end
+      redirect_to action: 'list'
     end 
-    def list_backups
+
+    def list
       data_directory = Rails.root.join('data')
       folders = Dir.entries(data_directory).select { |entry| File.directory?(File.join(data_directory, entry)) && entry != '.' && entry != '..' }
 
@@ -49,10 +47,9 @@ class Api::UploadsController < ActionController::Base
       end
   
       @folders = folder_info
-      #render json: { folders: folder_info }
     end
 
-    def delete_backup
+    def delete
       # Verifique se o parâmetro 'backup_name' foi enviado na solicitação.
       if params[:backup_name].present?
         backup_folder = Rails.root.join('data', params[:backup_name])
@@ -61,35 +58,16 @@ class Api::UploadsController < ActionController::Base
         if File.exist?(backup_folder)
           # Exclua a pasta de backup e seu conteúdo.
           FileUtils.rm_rf(backup_folder)
-          render json: { message: 'Backup excluído com sucesso.' }
+          redirect_to action: 'list'
         else
-          render json: { message: 'O backup não existe.' }, status: :not_found
+          redirect_to action: 'list'
         end
       else
-        render json: { message: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
+        redirect_to action: 'list'
       end
     end
 
-    def delete_file
-      backup_name = params[:backup_name]
-      file_name = params[:file_name]
-  
-      if backup_name.present? && file_name.present?
-        backup_folder = Rails.root.join('data', backup_name)
-        file_path = File.join(backup_folder, file_name)
-  
-        if File.exist?(file_path)
-          File.delete(file_path)
-          render json: { message: "Arquivo #{file_name} deletado com sucesso do backup #{backup_name}." }
-        else
-          render json: { message: "Arquivo #{file_name} não encontrado no backup #{backup_name}." }, status: :not_found
-        end
-      else
-        render json: { message: 'Parâmetros "backup_name" e "file_name" são obrigatórios.' }, status: :unprocessable_entity
-      end
-    end
-
-    def download_backup
+    def download
       backup_name = params[:backup_name]
   
       if backup_name.present?
@@ -117,25 +95,6 @@ class Api::UploadsController < ActionController::Base
         end
       else
         render json: { error: 'O parâmetro "backup_name" é obrigatório.' }, status: :unprocessable_entity
-      end
-    end
-
-    def download_file
-      backup_name = params[:backup_name]
-      file_name = params[:file_name]
-  
-      if backup_name.present? && file_name.present?
-        backup_folder = Rails.root.join('data', backup_name)
-        file_path = File.join(backup_folder, file_name)
-  
-        if File.exist?(file_path)
-          # Configure o cabeçalho de resposta Content-Disposition para forçar o download.
-          send_file file_path, disposition: 'attachment'
-        else
-          render json: { error: "O arquivo #{file_name} não foi encontrado no backup #{backup_name}." }, status: :not_found
-        end
-      else
-        render json: { error: 'Os parâmetros "backup_name" e "file_name" são obrigatórios.' }, status: :unprocessable_entity
       end
     end
   

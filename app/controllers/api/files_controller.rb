@@ -29,4 +29,42 @@ class Api::FilesController < ActionController::Base
             render json: { error: 'O nome do backup não foi fornecido.' }, status: :unprocessable_entity
         end
     end
+
+    def delete
+      backup_name = params[:backup_name]
+      file_name = params[:file_name]
+  
+      if backup_name.present? && file_name.present?
+        backup_folder = Rails.root.join('data', backup_name)
+        file_path = File.join(backup_folder, file_name)
+  
+        if File.exist?(file_path)
+          File.delete(file_path)
+          redirect_to action: 'list', backup_name: backup_name
+        else
+          render json: { message: "Arquivo #{file_name} não encontrado no backup #{backup_name}." }, status: :not_found
+        end
+      else
+        render json: { message: 'Parâmetros "backup_name" e "file_name" são obrigatórios.' }, status: :unprocessable_entity
+      end
+    end
+
+    def download
+        backup_name = params[:backup_name]
+        file_name = params[:file_name]
+    
+        if backup_name.present? && file_name.present?
+          backup_folder = Rails.root.join('data', backup_name)
+          file_path = File.join(backup_folder, file_name)
+    
+          if File.exist?(file_path)
+            # Configure o cabeçalho de resposta Content-Disposition para forçar o download.
+            send_file file_path, disposition: 'attachment'
+          else
+            render json: { error: "O arquivo #{file_name} não foi encontrado no backup #{backup_name}." }, status: :not_found
+          end
+        else
+          render json: { error: 'Os parâmetros "backup_name" e "file_name" são obrigatórios.' }, status: :unprocessable_entity
+        end
+    end
 end

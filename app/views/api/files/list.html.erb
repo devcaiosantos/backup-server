@@ -7,26 +7,48 @@
     td {
       width: 200px;
     }
+    form {
+      margin: 10px;
+    }
     .folder {
       background-color: #eee;
+    }
+    td.btn {
+      background-color: white;
+      width: auto;
     }
   </style>
 </head>
 
+<%= link_to 'Voltar', backup_path %>
 <h1>Backup: <%= @folder %></h1>
 
 <table>
-    <tr>
-        <th>Nome</th>
-        <th>Criado em:</th>
-        <th>Última modificação</th>
-    </tr>
-    <% @files.each do |file| %>
-    <tr class="folder">
-        <td><%= file[:name] %></td>
-        <td><%= file[:created_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
-        <td><%= file[:updated_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
-        </tr> 
-    <% end %>
+  <tr>
+    <th>Arquivo</th>
+    <th>Criado em:</th>
+    <th>Última modificação</th>
+  </tr>
+  <% @files.each do |file| %>
+  <tr class="folder">
+    <td><%= file[:name] %></td>
+    <td><%= file[:created_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+    <td><%= file[:updated_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
+    <td class="btn">
+      <%= form_tag('/api/download_file', method: :get) do %>
+        <%= hidden_field_tag :backup_name, @folder %>
+        <%= hidden_field_tag :file_name, file[:name] %>
+        <%= submit_tag("Download") %>
+      <%end %>
+    </td>
+    <td class="btn">
+      <%= form_tag('/api/delete_file', method: :delete) do %>
+        <%= hidden_field_tag :backup_name, @folder %>
+        <%= hidden_field_tag :file_name, file[:name] %>
+        <%= submit_tag("Remover") %>
+      <%end %>
+    </td>
+  </tr> 
+  <% end %>
 </table>
 
