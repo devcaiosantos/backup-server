@@ -39,13 +39,11 @@
 <table>
   <tr>
     <th>Nome</th>
-    <th>Criado em:</th>
     <th>Última modificação</th>
   </tr>
   <% @folders.each do |folder| %>
     <tr class="folder">
       <td><%= link_to folder[:name], list_path(folder[:name]), remote: true %></td>
-      <td><%= folder[:created_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
       <td><%= folder[:updated_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
       <td class="btn">
         <%= form_tag('/api/download_backup', method: :get) do %>
@@ -69,7 +67,7 @@
   <%= text_field_tag(:backup_name) %>
   <br><br>
   <%= check_box_tag(:overwrite, true) %>
-  <%= label_tag(:overwrite, "Sobrescrever arquivos caso haja existente") %>
+  <%= label_tag(:overwrite, "Sobrescrever arquivos") %>
   <br><br>
   <%= file_field_tag 'files[]', multiple: true %>
   <br><br>

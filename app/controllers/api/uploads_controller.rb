@@ -6,6 +6,8 @@ class Api::UploadsController < ActionController::Base
         backup_folder = Rails.root.join('data', params[:backup_name])
         FileUtils.mkdir_p(backup_folder)
 
+        cpFiles_folder = Rails.root.join('tmpCpFiles', params[:backup_name])
+        
         params[:files].each do |uploaded_file|
           file_path = File.join(backup_folder, uploaded_file.original_filename)
 
@@ -30,7 +32,6 @@ class Api::UploadsController < ActionController::Base
       end
       redirect_to action: 'list'
     end 
-
     def list
       data_directory = Rails.root.join('data')
       folders = Dir.entries(data_directory).select { |entry| File.directory?(File.join(data_directory, entry)) && entry != '.' && entry != '..' }

@@ -26,13 +26,11 @@
 <table>
   <tr>
     <th>Arquivo</th>
-    <th>Criado em:</th>
     <th>Última modificação</th>
   </tr>
   <% @files.each do |file| %>
   <tr class="folder">
     <td><%= file[:name] %></td>
-    <td><%= file[:created_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
     <td><%= file[:updated_at].strftime('%d/%m/%y - %H:%M:%S') %></td>
     <td class="btn">
       <%= form_tag('/api/download_file', method: :get) do %>
